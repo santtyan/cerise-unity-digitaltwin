@@ -137,3 +137,13 @@ docker compose down
 cd ~/cerise-digital-twin-docker
 docker compose build
 ```
+
+## Docker Alternative
+
+Para ambiente completamente isolado, veja:  
+**Repositório Docker:** `~/cerise-digital-twin-docker/README.md`
+
+Recomendado quando:
+- Múltiplos projetos ROS conflitantes
+- Setup reproducible necessário
+- CI/CD pipelines
