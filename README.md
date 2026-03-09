@@ -86,3 +86,54 @@ Desenvolvedor: Yan Tyan
 ## Licença
 
 MIT
+
+---
+
+## Docker Setup (Alternativa - Isolamento Total)
+
+### Arquitetura Docker
+```
+Docker Container: ROS-TCP-Endpoint (port 10000)
+Host: Gazebo + Unity 6
+```
+
+**Benefícios:**
+- ✅ Isolamento completo ROS packages
+- ✅ Zero conflito com outros projetos ROS
+- ✅ Environment reproducible
+- ✅ Gazebo no host (acesso GPU direto)
+
+### Startup Docker
+
+**Repositório:** `~/cerise-digital-twin-docker`
+
+#### Terminal 1 - Gazebo (Host)
+```bash
+source ~/unity_bridge_ws/install/setup.bash
+export TURTLEBOT3_MODEL=waffle
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py gui:=false
+```
+
+#### Terminal 2 - ROS Bridge (Docker)
+```bash
+cd ~/cerise-digital-twin-docker
+docker compose up
+```
+
+#### Unity
+1. Abrir projeto Unity
+2. Play ▶️
+3. Controlar com WASD
+
+### Stop Docker
+```bash
+# T1: Ctrl+C (Gazebo)
+# T2: Ctrl+C
+docker compose down
+```
+
+### Rebuild Docker Image
+```bash
+cd ~/cerise-digital-twin-docker
+docker compose build
+```
