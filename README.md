@@ -57,6 +57,9 @@ Assets/Scripts/
 ## Troubleshooting
 
 **Câmera preta no Game view:**
+- Canvas → Render Mode: `Screen Space - Overlay`
+- CameraView → Rect Transform: Pos X:0, Pos Y:0, Width:1920, Height:1080, Anchors Min(0,0) Max(1,1)
+- Android Build Support instalado (necessário para MetaQuest VR build)
 - Preview funciona? Sistema OK (problema cosmético Canvas)
 
 **WASD não responde:**
