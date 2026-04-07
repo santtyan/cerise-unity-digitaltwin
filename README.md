@@ -1,73 +1,86 @@
-# CERISE Digital Twin — Unity + ROS2
+# CERISE Digital Twin — Unity + ROS 2
 
 Digital twin do TurtleBot3 Waffle para visualização e teleoperação via Unity 6.
 
 ## Stack
 
-- **Unity 6.3 LTS** (ROS-TCP-Connector)
-- **ROS 2 Humble** (via ROS-TCP-Endpoint)
-- **Gazebo 11** (TurtleBot3 Waffle headless)
-- **Ubuntu 22.04**
+- Unity 6.3 LTS (ROS-TCP-Connector)
+- ROS 2 Humble (via ROS-TCP-Endpoint)
+- Gazebo 11 (TurtleBot3 Waffle headless)
+- Ubuntu 22.04 via WSL2
 
 ## Funcionalidades
 
-- ✅ **Camera streaming** (5 Hz rate-limited, estável 30+ min)
-- ✅ **Teleop WASD** (Input System, responsivo)
-- ✅ **LiDAR 360° visualization** (LineRenderer real-time)
-- ✅ **TF-based tracking** (robô segue transformações ROS)
+- ✅ Camera streaming (5 Hz rate-limited, estável 30+ min)
+- ✅ Teleop WASD (Input System, responsivo)
+- ✅ LiDAR 360° visualization (LineRenderer real-time)
+- ✅ TF-based tracking (robô segue transformações ROS)
 
 ## Arquitetura
-```
+
+\`\`\`
 ROS 2 Humble ←→ ROS-TCP-Endpoint (Port 10000) ←→ Unity 6
      ↓                                                 ↓
   Gazebo                                      Digital Twin Viz
 TurtleBot3 Waffle                         Câmera + LiDAR + Teleop
-```
+\`\`\`
 
 ## Startup
 
-### Terminal 1 - ROS Bridge
-```bash
+**Terminal 1 — ROS Bridge**
+\`\`\`bash
 cd ~/unity_bridge_ws
 source install/setup.bash
 ros2 run ros_tcp_endpoint default_server_endpoint --ros-args -p ROS_IP:=0.0.0.0
-```
+\`\`\`
 
-### Terminal 2 - Gazebo
-```bash
+**Terminal 2 — Gazebo (headless)**
+\`\`\`bash
 export TURTLEBOT3_MODEL=waffle
 ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py gui:=false
-```
+\`\`\`
 
-### Unity
+**Unity**
 1. Abrir projeto no Unity Hub
-2. Scene: `Assets/Scenes/SampleScene.unity`
+2. Scene: \`Assets/Scenes/SampleScene.unity\`
 3. Play ▶️
-4. Controlar com **WASD** (foco na janela Game)
+4. Controlar com WASD (foco na janela Game)
 
 ## Estrutura Scripts
-```
+
+\`\`\`
 Assets/Scripts/
 ├── CameraSubscriber.cs    # Subscribe /camera/image_raw/compressed
-├── TeleopController.cs     # Publish /cmd_vel via Input System
-├── LidarVisualizer.cs      # Subscribe /scan, render LineRenderer
-└── TFSubscriber.cs         # Subscribe /tf, tracking base_footprint
-```
+├── TeleopController.cs    # Publish /cmd_vel via Input System
+├── LidarVisualizer.cs     # Subscribe /scan, render LineRenderer
+└── TFSubscriber.cs        # Subscribe /tf, tracking base_footprint
+\`\`\`
+
+## Configuração WSL2
+
+Arquivo \`%USERPROFILE%\.wslconfig\`:
+\`\`\`
+[wsl2]
+memory=6GB
+swap=4GB
+processors=4
+\`\`\`
+
+Após editar: \`wsl --shutdown\` e reiniciar.
 
 ## Troubleshooting
 
 **Câmera preta no Game view:**
-- Canvas → Render Mode: `Screen Space - Overlay`
+- Canvas → Render Mode: \`Screen Space - Overlay\`
 - CameraView → Rect Transform: Pos X:0, Pos Y:0, Width:1920, Height:1080, Anchors Min(0,0) Max(1,1)
 - Android Build Support instalado (necessário para MetaQuest VR build)
-- Preview funciona? Sistema OK (problema cosmético Canvas)
 
 **WASD não responde:**
 - Clicar na janela Game (foco necessário)
-- Verificar `Edit → Project Settings → Player → Active Input Handling = Both`
+- Verificar \`Edit → Project Settings → Player → Active Input Handling = Both\`
 
 **LiDAR não aparece:**
-- Verificar `Hierarchy → RobotBase → LidarViz` (parent-child correto)
+- Verificar \`Hierarchy → RobotBase → LidarViz\` (parent-child correto)
 - Console sem erros de compilação?
 
 **Queue warnings (amarelo):**
@@ -75,78 +88,17 @@ Assets/Scripts/
 
 ## Próximos Passos
 
-- [ ] MetaQuest VR integration (reunião 18/03)
-- [ ] URDF import (modelo 3D TurtleBot3 real)
-- [ ] Nav2 path visualization
-- [ ] Multi-robot coordination
+- MetaQuest VR integration (Camera Rig VR)
+- URDF import (modelo 3D TurtleBot3 real)
+- Nav2 path visualization
+- Multi-robot coordination
 
 ## Instituição
 
-**UFG - CERISE Lab**  
-Orientador: Prof. Alisson  
+UFG - CERISE Lab
+Orientador: Prof. Alisson
 Desenvolvedor: Yan Tyan
 
 ## Licença
 
 MIT
-
----
-
-## Docker Setup (Alternativa - Isolamento Total)
-
-### Arquitetura Docker
-```
-Docker Container: ROS-TCP-Endpoint (port 10000)
-Host: Gazebo + Unity 6
-```
-
-**Benefícios:**
-- ✅ Isolamento completo ROS packages
-- ✅ Zero conflito com outros projetos ROS
-- ✅ Environment reproducible
-- ✅ Gazebo no host (acesso GPU direto)
-
-### Startup Docker
-
-**Repositório:** `~/cerise-digital-twin-docker`
-
-#### Terminal 1 - Gazebo (Host)
-```bash
-source ~/unity_bridge_ws/install/setup.bash
-export TURTLEBOT3_MODEL=waffle
-ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py gui:=false
-```
-
-#### Terminal 2 - ROS Bridge (Docker)
-```bash
-cd ~/cerise-digital-twin-docker
-docker compose up
-```
-
-#### Unity
-1. Abrir projeto Unity
-2. Play ▶️
-3. Controlar com WASD
-
-### Stop Docker
-```bash
-# T1: Ctrl+C (Gazebo)
-# T2: Ctrl+C
-docker compose down
-```
-
-### Rebuild Docker Image
-```bash
-cd ~/cerise-digital-twin-docker
-docker compose build
-```
-
-## Docker Alternative
-
-Para ambiente completamente isolado, veja:  
-**Repositório Docker:** `~/cerise-digital-twin-docker/README.md`
-
-Recomendado quando:
-- Múltiplos projetos ROS conflitantes
-- Setup reproducible necessário
-- CI/CD pipelines
